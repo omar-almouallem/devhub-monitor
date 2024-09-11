@@ -1,0 +1,56 @@
+{
+  "name": "devhubmonitor",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/devhubmonitor/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/devhubmonitor",
+        "format": ["cjs"],
+        "bundle": false,
+        "main": "apps/devhubmonitor/src/main.ts",
+        "tsConfig": "apps/devhubmonitor/tsconfig.app.json",
+        "assets": ["apps/devhubmonitor/src/assets"],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "devhubmonitor:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "devhubmonitor:build:development"
+        },
+        "production": {
+          "buildTarget": "devhubmonitor:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,13 @@
+import { css } from '@emotion/react';
+export const rowStyles = css`
+  height: auto;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+`;
+export const formStyles = css`
+  width: 60%;
+`;
