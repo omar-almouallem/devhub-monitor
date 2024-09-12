@@ -4,6 +4,7 @@ import express, { Response, Request } from 'express';
 
 import { GitHubConnectionService } from '../lib/github/githubConnectionService';
 import { GitHubTokenService } from './../service/gitHubTokenService';
+import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
 import { handleError } from '../lib/utils/errorHandler';
 
 const router = express.Router();
@@ -14,15 +15,7 @@ router.post('/auth/github/', async (req: Request, res: Response) => {
   const githubToken = req.body.githubToken;
 
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ message: 'Authentication required!' });
-    }
-    const accessToken = authHeader.split(' ')[1];
-    if (!accessToken) {
-      return res.status(401).json({ message: 'Invalid token format!' });
-    }
-    const userId = decodeToken(accessToken);
+    const userId = getUserIdFromAccessToken(req);
 
     if (!githubToken) {
       return res.status(400).json({ message: 'GitHub token is required!' });
