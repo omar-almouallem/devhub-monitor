@@ -1,16 +1,15 @@
-import { decodeToken } from '@dev-hub-monitor/utils';
 import express, { Response, Request } from 'express';
 
-import { UserDataService } from '../service/userDataService';
 import { handleError } from '../lib/utils/errorHandler';
+import { UserDataService } from '../service/userDataService';
+import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
 
 const router = express.Router();
 const userDataService = new UserDataService();
 
-router.get('/user/:id', async (req: Request, res: Response) => {
+router.get('/user', async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
-    const userId = decodeToken(id);
+    const userId = getUserIdFromAccessToken(req);
     const userData = await userDataService.getUserData(userId);
     res.status(200).json(userData);
   } catch (e) {
