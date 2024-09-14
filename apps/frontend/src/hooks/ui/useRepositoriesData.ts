@@ -8,7 +8,7 @@ export const useRepositoriesData = () => {
   const navigate = useNavigate();
   const { setUserData } = useUserData();
   const { login, logout } = useAuth();
-  const token = localStorage.getItem('AccessToken');
+  const token = localStorage.getItem('accessToken');
 
   const { userData, loading, error } = useFetchUserData(token);
 
