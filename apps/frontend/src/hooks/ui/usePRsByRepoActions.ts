@@ -13,7 +13,7 @@ const usePRsByRepoActions = (userData: any) => {
   };
 
   const handleCalculateAverage = () => {
-    fetchPRsByRepo(userData._id, selectedRepositories);
+    fetchPRsByRepo(selectedRepositories);
   };
 
   const repositoriesWithPRs = userData.gitHubRepoData.filter(

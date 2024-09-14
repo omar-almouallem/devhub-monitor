@@ -11,7 +11,7 @@ const usePRsByUserActions = (userData: any) => {
   };
 
   const handleFilterByUser = () => {
-    fetchPRsByUser(userData._id, selectedUser);
+    fetchPRsByUser(selectedUser);
   };
 
   const usersWithPRs: any[] = [

@@ -10,11 +10,7 @@ const usePRsByDateActions = (userData: any) => {
     null,
   );
 
-  const { pullRequestsData, fetchData } = useFetchPRsByDate(
-    userData._id,
-    projectName,
-    dates,
-  );
+  const { pullRequestsData, fetchData } = useFetchPRsByDate(projectName, dates);
 
   const handleSelectChange = (repoName: string) => {
     setProjectName(repoName);
