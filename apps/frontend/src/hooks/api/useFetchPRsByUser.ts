@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { message } from 'antd';
 
-import { filterPullRequestsByUser } from '../../services/auth.service';
+import { getAveragePRsByUser } from '../../services/userData.service';
 import { handleApiError } from './handleApiError';
 
 const useFetchPRsByUser = () => {
@@ -10,9 +10,9 @@ const useFetchPRsByUser = () => {
     overallAveragePullRequestTime: null,
   });
 
-  const fetchPRsByUser = async (userId: string, username: string) => {
+  const fetchPRsByUser = async (username: string) => {
     try {
-      const result = await filterPullRequestsByUser(userId, username);
+      const result = await getAveragePRsByUser(username);
       setFilteredPRs(result.data);
       message.success(`Filtered pull requests by user: ${username}`);
       if (result.status === 400) {

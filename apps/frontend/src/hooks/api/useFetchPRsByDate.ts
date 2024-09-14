@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import moment from 'moment';
 
-import { filterByDate } from '../../services/auth.service';
+import { getAveragePRsByDate } from '../../services/userData.service';
 import { message } from 'antd';
 import { handleApiError } from './handleApiError';
 
 const useFetchPRsByDate = (
-  userId: string,
   projectName: string,
   dates: [moment.Moment, moment.Moment] | null,
 ) => {
@@ -20,8 +19,7 @@ const useFetchPRsByDate = (
 
     try {
       const [startTime, endTime] = dates;
-      const response = await filterByDate(
-        userId,
+      const response = await getAveragePRsByDate(
         projectName,
         startTime.format('YYYY-MM-DD'),
         endTime.format('YYYY-MM-DD'),

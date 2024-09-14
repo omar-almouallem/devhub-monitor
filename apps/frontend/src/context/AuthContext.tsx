@@ -13,19 +13,19 @@ export const AuthProvider: React.FC<{ children: ReactNode; }> = ({ children }) =
 {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() =>
     {
-        const token = localStorage.getItem('AccessToken');
+        const token = localStorage.getItem('accessToken');
         return !!token;
     });
 
     useEffect(() =>
     {
         if (isAuthenticated) {
-            const token = localStorage.getItem('AccessToken');
+            const token = localStorage.getItem('accessToken');
             if (!token) {
                 setIsAuthenticated(false);
             }
         } else {
-            localStorage.removeItem('AccessToken');
+            localStorage.removeItem('accessToken');
         }
     }, [isAuthenticated]);
 
@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode; }> = ({ children }) =
     const logout = () =>
     {
         setIsAuthenticated(false);
-        localStorage.removeItem('AccessToken');
+        localStorage.removeItem('accessToken');
     };
 
     return (

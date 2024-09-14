@@ -1,18 +1,20 @@
-import { useState } from 'react';
 import { message } from 'antd';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { saveGithubToken } from '../../services/auth.service';
-import { useUserData } from '../../context/UserDataContext';
 import { handleApiError } from './handleApiError';
+import { saveGithubToken } from '../../services/userData.service';
 
 export const useInsertTokenApi = () => {
-  const { userData } = useUserData();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSaveGithubToken = async (githubToken: string) => {
     setLoading(true);
     try {
-      await saveGithubToken(userData._id, githubToken);
+      await saveGithubToken(githubToken);
+      navigate('/dashboard');
+
       message.success('Token saved successfully');
     } catch (e: any) {
       handleApiError(e);
