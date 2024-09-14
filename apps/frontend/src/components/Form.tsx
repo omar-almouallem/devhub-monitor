@@ -48,7 +48,6 @@ const AuthForm: React.FC<DynamicFormProps> = ({ formType }) =>
           const token = loginResponse.data.accessToken;
           if (token) {
             login();
-            localStorage.setItem('AccessToken', token);
             toast.success('Login successful!');
             navigate('/dashboard');
           } else {
