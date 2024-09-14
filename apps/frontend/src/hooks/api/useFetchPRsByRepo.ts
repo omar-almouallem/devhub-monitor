@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { message } from 'antd';
 
-import { getAveragePullRequestsByProjects } from '../../services/auth.service';
+import { getAveragePRsByRepo } from '../../services/userData.service';
 import { handleApiError } from './handleApiError';
 
 const useFetchPRsByRepo = () => {
   const [averagePRs, setAveragePRs] = useState<any>(null);
 
-  const fetchPRsByRepo = async (
-    userId: string,
-    selectedRepositories: string[],
-  ) => {
+  const fetchPRsByRepo = async (selectedRepositories: string[]) => {
     try {
-      const res = await getAveragePullRequestsByProjects(
-        userId,
-        selectedRepositories,
-      );
+      const res = await getAveragePRsByRepo(selectedRepositories);
 
       if (res.status === 204) {
         message.error('No pull requests found !');
