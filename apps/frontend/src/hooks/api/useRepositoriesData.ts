@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getUserData } from '../../services/auth.service';
+import { getUserData } from '../../services/userData.service';
 
 const useFetchUserData = (token: string | null) => {
   const [userData, setUserData] = useState<any>(null);
@@ -11,7 +11,7 @@ const useFetchUserData = (token: string | null) => {
     const fetchData = async () => {
       if (token) {
         try {
-          const fetchedUserData = await getUserData(token);
+          const fetchedUserData = await getUserData();
           setUserData(fetchedUserData);
         } catch (error) {
           console.error('Failed to fetch user data:', error);
