@@ -13,7 +13,7 @@ import { UserMapper } from '../lib/mappers/user.mapper';
 import {
   validateSignupData,
   validateLoginData,
-} from '../lib/validations/validateData ';
+} from '../lib/validations/validateData';
 import { handleError } from '../lib/utils/errorHandler';
 
 const router = express.Router();

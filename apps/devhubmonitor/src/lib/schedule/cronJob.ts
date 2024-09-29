@@ -7,7 +7,7 @@ const updateDataService = new UpdateDataService();
 export const startCronJob = async () => {
   const job = new CronJob('*/1 * * * * ', () => {
     // Update repositories every 4 hours
-    // updateDataService.updateRepositoriesData();
+    updateDataService.updateRepositoriesData();
   });
 
   job.start();

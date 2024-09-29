@@ -1,11 +1,11 @@
-import { InvalidGitHubTokenError } from '@dev-hub-monitor/types';
-import { decodeToken } from '@dev-hub-monitor/utils'; // تأكد أن هذا الدالة تدعم فك ترميز accessToken
 import express, { Response, Request } from 'express';
+import { InvalidGitHubTokenError } from '@dev-hub-monitor/types';
 
 import { GitHubConnectionService } from '../lib/github/githubConnectionService';
 import { GitHubTokenService } from './../service/gitHubTokenService';
 import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
 import { handleError } from '../lib/utils/errorHandler';
+import { getSixMonthsAgo } from '../lib/utils/timeHelpers';
 
 const router = express.Router();
 const gitHubTokenService = new GitHubTokenService();
@@ -21,19 +21,23 @@ router.post('/auth/github/', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'GitHub token is required!' });
     }
 
-    const userData = await gitHubConnectionService.fetchData(githubToken);
+    await gitHubConnectionService.fetchData(
+      userId,
+      githubToken,
+      getSixMonthsAgo(),
+    );
+
     await gitHubTokenService.storeGitHubToken({
       userId,
       githubToken,
     });
+
     await gitHubTokenService.updateVerifyState(userId);
-    await gitHubTokenService.storeGitHubData(userId, userData);
 
     return res.status(200).json({
-      message: 'The token has been successfully stored',
+      message: 'The token and GitHub data have been successfully stored',
     });
   } catch (e) {
-    console.log(e);
     switch (true) {
       case e instanceof InvalidGitHubTokenError:
         return res.status(401).json({ message: e.message });

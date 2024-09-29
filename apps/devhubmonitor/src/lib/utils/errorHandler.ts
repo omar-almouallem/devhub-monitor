@@ -9,9 +9,12 @@ export function handleResponseError (e) {
     if (e.response.status === 401) {
       throw new InvalidGitHubTokenError();
     } else {
+      console.log(e);
+
       throw new ServerGitHubError();
     }
   } else {
+    console.log(e);
     throw new Error('Failed to connect to GitHub server');
   }
 }
