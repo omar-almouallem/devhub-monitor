@@ -8,7 +8,7 @@ import {
 } from '@dev-hub-monitor/types';
 import { compareWithHash, createJwtToken, hash } from '@dev-hub-monitor/utils';
 
-import { MongoTodoRepository } from '../infra/repositories/users-repositories';
+import { MongoTodoRepository } from '../infra/repositories/userRepositories';
 import { UserMapper } from '../lib/mappers/user.mapper';
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../config';
 import {

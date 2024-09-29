@@ -1,30 +1,43 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { IGithubData } from '@dev-hub-monitor/types';
+import { IRepository, IPullRequest } from '@dev-hub-monitor/types';
 
 import { BASE_GITHUB_URL } from '../../config/constants';
+import { GitHubTokenService } from '../../service/gitHubTokenService';
 
 import {
   formatPullRequestsData,
-  mergeReposWithPulls,
   handleResponseError,
+  formatRepoData,
 } from '../utils';
-import { formatUserData } from '../utils/formatUserData';
 
 const axiosInstance = axios.create({
   baseURL: BASE_GITHUB_URL,
 });
 axiosRetry(axiosInstance, {
-  retries: 3,
+  retries: 8,
   retryDelay: (retryCount) => {
-    return retryCount * 1000;
+    return retryCount * 10000;
   },
   retryCondition: (error) => {
     return error.response.status === 429 || error.response.status >= 500;
   },
 });
+interface PaginationParams {
+  page?: number;
+  per_page?: number;
+  since?: string;
+  state: string;
+  sort: string;
+  direction: string;
+}
 
 export class GitHubConnectionService {
+  githubTokenService: GitHubTokenService;
+  constructor () {
+    this.githubTokenService = new GitHubTokenService();
+  }
+
   async getUser (githubToken: string) {
     try {
       const user = await axiosInstance.get('/user', {
@@ -32,90 +45,110 @@ export class GitHubConnectionService {
           Authorization: `token ${githubToken}`,
         },
       });
-      const formatettedData = formatUserData(user);
-      return formatettedData;
+      return user.data;
     } catch (e) {
       handleResponseError(e);
     }
   }
-  async getRepositories (githubToken: string) {
-    let allRepositories = [];
+
+  async *fetchPaginatedData (
+    url: string,
+    githubToken: string,
+    params: PaginationParams,
+    formatDataFn: (response: any) => Promise<any>,
+    stopConditionFn?: (item: any) => boolean,
+  ) {
     let page = 1;
-    let perPage = 30;
+    let perPage = params.per_page || 1;
     let hasMore = true;
+
     try {
       while (hasMore) {
-        const repositoriesResponse = await axiosInstance.get('/user/repos', {
-          headers: {
-            Authorization: `token ${githubToken}`,
-          },
-          params: {
-            page,
-            per_page: perPage,
-          },
+        params.page = page;
+        params.per_page = perPage;
+
+        const response = await axiosInstance.get(url, {
+          headers: { Authorization: `token ${githubToken}` },
+          params,
         });
 
-        const repositories = repositoriesResponse.data;
-        console.log(`repositories:${repositories}`);
+        const data = await formatDataFn(response);
 
-        allRepositories = [...allRepositories, ...repositories];
-        if (repositories.length < perPage) {
-          hasMore = false;
-        } else {
-          page++;
+        for (const item of data) {
+          if (stopConditionFn && stopConditionFn(item)) {
+            hasMore = false;
+            break;
+          }
+          yield item;
         }
-      }
-      console.log(allRepositories);
-      return allRepositories;
-    } catch (e) {
-      handleResponseError(e);
-    }
-  }
-  async getPullRequests (repoFullName: string, githubToken: string) {
-    let allPullRequests = [];
-    let page = 1;
-    let perPage = 30;
-    let hasMore = true;
 
-    try {
-      while (hasMore) {
-        const pullRequestsResponse = await axiosInstance.get(
-          `/repos/${repoFullName}/pulls`,
-          {
-            headers: { Authorization: `token ${githubToken}` },
-            params: {
-              state: 'all',
-              page,
-              per_page: perPage,
-            },
-          },
-        );
-
-        const pullRequests = formatPullRequestsData(pullRequestsResponse);
-
-        allPullRequests = [...allPullRequests, ...pullRequests];
-
-        if (pullRequests.length < perPage) {
-          hasMore = false;
+        const linkHeader = response.headers['link'];
+        if (linkHeader) {
+          const hasNextPage = linkHeader.includes('rel="next"');
+          hasMore = hasNextPage;
         } else {
-          page++;
+          hasMore = false;
         }
-      }
 
-      return allPullRequests;
+        page++;
+      }
     } catch (e) {
       handleResponseError(e);
     }
   }
 
-  async fetchData (githubToken: string): Promise<IGithubData | any> {
-    const repositories = await this.getRepositories(githubToken);
-    const repositoriesWithPullRequests = await mergeReposWithPulls(
-      repositories,
-      this.getPullRequests,
+  async getRepositories (userId: string, githubToken: string, since: Date) {
+    const params = {
+      state: 'all',
+      sort: 'updated',
+      direction: 'desc',
+      since: since.toISOString(),
+    };
+
+    for await (const repo of this.fetchPaginatedData(
+      '/user/repos',
       githubToken,
-    );
+      params,
+      formatRepoData,
+    )) {
+      const updatedRepo = await this.githubTokenService.storeRepository(
+        userId,
+        repo,
+      );
 
-    return repositoriesWithPullRequests;
+      await this.getPullRequestsV2(
+        repo.full_name,
+        githubToken,
+        since,
+        updatedRepo,
+      );
+    }
+  }
+
+  async getPullRequestsV2 (
+    repoFullName: string,
+    githubToken: string,
+    since: Date,
+    updatedRepo: IRepository,
+  ) {
+    const params = {
+      state: 'all',
+      sort: 'updated',
+      direction: 'desc',
+    };
+
+    for await (const pr of this.fetchPaginatedData(
+      `/repos/${repoFullName}/pulls`,
+      githubToken,
+      params,
+      formatPullRequestsData,
+      (pr) => new Date(pr.updated_at) < since,
+    )) {
+      await this.githubTokenService.storePullRequest(pr, updatedRepo);
+    }
+  }
+
+  async fetchData (userId: string, githubToken: string, since: Date) {
+    await this.getRepositories(userId, githubToken, since);
   }
 }

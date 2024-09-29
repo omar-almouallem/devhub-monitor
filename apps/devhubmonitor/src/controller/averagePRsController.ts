@@ -3,31 +3,25 @@ import { NoPullRequestsFoundError } from '@dev-hub-monitor/types';
 
 import { handleError } from '../lib/utils/errorHandler';
 import { UserDataService } from '../service/userDataService';
-import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
 
 const router = express.Router();
 const userDataService = new UserDataService();
-
-router.get('/averagePRsByProject', async (req: Request, res: Response) => {
+router.get('/averagePRsByRepo', async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdFromAccessToken(req);
-    console.log(userId);
-    let projectNames = req.query.projectNames as string[];
-    if (typeof projectNames === 'string') {
-      projectNames = [projectNames];
+    let repoFullName = req.query.repoFullName as string[];
+    if (typeof repoFullName === 'string') {
+      repoFullName = [repoFullName];
     }
-    if (!projectNames) {
+    if (!repoFullName) {
       return res.status(400).json({ message: 'Project names are required' });
     }
-    if (projectNames.length === 0) {
+    if (repoFullName.length === 0) {
       return res.status(400).json({ message: 'You must input minimum 1 name' });
     }
 
-    const result = await userDataService.avregePRsByProject(
-      userId,
-      projectNames,
-    );
-    return res.json(result);
+    const result = await userDataService.avregePRsByRepo(repoFullName);
+
+    res.status(200).json(result);
   } catch (e) {
     if (e instanceof NoPullRequestsFoundError) {
       return res.status(204).json({ message: e.message });
@@ -35,18 +29,14 @@ router.get('/averagePRsByProject', async (req: Request, res: Response) => {
     handleError(res, e);
   }
 });
-
-router.get('/averagePRsByName', async (req: Request, res: Response) => {
+router.get('/averagePRsByUser', async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdFromAccessToken(req);
     const userName = req.query.userName.toString();
-
+    const userData = await userDataService.avregePRsByUser(userName);
     if (!userName) {
       return res.status(400).json({ message: 'Project name is required' });
     }
-
-    const result = await userDataService.avregePRsByName(userId, userName);
-    return res.json(result);
+    res.status(200).json(userData);
   } catch (e) {
     if (e instanceof NoPullRequestsFoundError) {
       return res.status(204).json({ message: e.message });
@@ -54,25 +44,17 @@ router.get('/averagePRsByName', async (req: Request, res: Response) => {
     handleError(res, e);
   }
 });
-
 router.get('/averagePRsByDate', async (req: Request, res: Response) => {
   try {
-    const userId = getUserIdFromAccessToken(req);
-    const { projectName, startTime, endTime } = req.query;
-    const start = new Date(startTime as string);
-    const end = new Date(endTime as string);
-
-    if (!projectName || isNaN(start.getTime()) || isNaN(end.getTime())) {
+    const { repoName, startDate, endDate } = req.query;
+    const repo = repoName.toString();
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+    if (!repo || isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({ message: 'Invalid or missing parameters' });
     }
-
-    const result = await userDataService.avregePRsByDate(
-      userId,
-      projectName.toString(),
-      start,
-      end,
-    );
-    return res.json(result);
+    const userData = await userDataService.avregePRsByDate(repo, start, end);
+    res.status(200).json(userData);
   } catch (e) {
     if (e instanceof NoPullRequestsFoundError) {
       return res.status(204).json({ message: e.message });

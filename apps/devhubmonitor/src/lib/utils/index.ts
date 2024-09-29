@@ -1,3 +1,2 @@
-export * from './formatPRsData';
-export * from './mergeData';
+export * from './formatData';
 export * from './errorHandler';

@@ -4,10 +4,11 @@ import {
 } from '@dev-hub-monitor/types';
 
 import { handleError } from '../lib/utils';
+import { getTowDaysAgo } from '../lib/utils/timeHelpers';
 import { CONCURRENCY_DURATION } from '../config/constants';
 import { GitHubTokenService } from '../service/gitHubTokenService';
 import { runPromisePool } from '../lib/concurrentProcessor/promisePool';
-import { MongoTodoRepository } from '../infra/repositories/users-repositories';
+import { MongoTodoRepository } from '../infra/repositories/userRepositories';
 import { GitHubConnectionService } from '../lib/github/githubConnectionService';
 
 export class UpdateDataService {
@@ -30,23 +31,19 @@ export class UpdateDataService {
         async (user) => {
           try {
             if (user && user.githubToken !== undefined) {
-              const newUserData = await this.gitHubConnectionService.fetchData(
-                user.githubToken,
-              );
-              await this.githubTokenService.storeGitHubData(
+              await this.gitHubConnectionService.fetchData(
                 user._id,
-                newUserData,
+                user.githubToken,
+                getTowDaysAgo(),
               );
             }
           } catch (e) {
             if (e instanceof InvalidGitHubTokenError) {
-              await this.userRepository.updateUserById(user.id, {
+              await this.userRepository.updateUserById(user._id, {
                 isVerified: false,
               });
-              console.log(
-                `Invalid Token for user ${user.id}, You Should insert new Token!`,
-              );
             } else {
+              console.log(e);
               throw new ServerGitHubTokenError();
             }
           }
