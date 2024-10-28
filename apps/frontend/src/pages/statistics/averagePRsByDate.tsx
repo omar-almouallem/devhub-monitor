@@ -5,51 +5,61 @@ import moment from 'moment';
 import locale from 'antd/locale/en_US';
 
 
-import { useUserData } from '../../context/UserDataContext';
 import usePullRequestActions from '../../hooks/ui/usePRsByDateActions';
-import { Typography } from 'antd';
 import AveragePRsTimeCard from '../../components/AveragePRsTimeCard';
+import { DownOutlined } from '@ant-design/icons';
 
 const { RangePicker } = DatePicker;
-const { Option } = Select;
-const { Title, Text } = Typography;
 
 
 const averagePRsByDate: React.FC = () =>
 {
-  const { userData } = useUserData();
   const {
-    projectName,
-    pullRequestsData,
+    handleLoadMore,
+    selectedRepositories,
     handleSelectChange,
     handleFetchData,
     setDates,
-  } = usePullRequestActions(userData);
-  const chartData = pullRequestsData ? pullRequestsData.pullRequests.map((pr: any) =>
+    filteredRepo,
+    averageTime,
+    listOfReposNames,
+  } = usePullRequestActions();
+  const chartData = filteredRepo.map((pr: any) =>
   {
     return {
       name: pr.title,
       CreatedAt: pr.created_at ? new Date(pr.created_at).getTime() : null,
       MergedAt: pr.merged_at ? new Date(pr.merged_at).getTime() : null,
     };
-  }) : [];
+  });
 
 
   return (
     <ConfigProvider locale={locale}>
       <div style={{ maxWidth: 800, margin: 'auto', padding: '20px' }}>
+
         <Select
-          showSearch
-          allowClear={true}
           style={{ width: '100%', marginBottom: '10px' }}
-          onChange={handleSelectChange}
-          value={projectName || undefined}
           placeholder="Select repositories"
+          onChange={handleSelectChange}
+          value={selectedRepositories}
+          dropdownRender={menu => (
+            <>
+              {menu}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
+                <Button
+                  type="text"
+                  onClick={handleLoadMore}
+                  icon={<DownOutlined />}
+                />
+              </div>
+            </>
+          )}
         >
-          {userData.gitHubRepoData.map((repo: any) => (
-            <Option key={repo.name} value={repo.name}>
-              {repo.name}
-            </Option>
+          {listOfReposNames.map((repo: { unique_key: string; }) => (
+            <Select.Option key={repo.unique_key} value={repo.unique_key}>
+              {repo.unique_key}
+            </Select.Option>
           ))}
         </Select>
 
@@ -59,14 +69,18 @@ const averagePRsByDate: React.FC = () =>
           style={{ marginBottom: 20, width: '100%' }}
         />
 
-        <Button type="primary" onClick={handleFetchData} disabled={!projectName}
+        <Button type="primary" onClick={handleFetchData} disabled={!selectedRepositories}
         >
           Submit
         </Button>
-        {pullRequestsData && (
-          <AveragePRsTimeCard titleText={'Average Pull Request Time'} averageTime={pullRequestsData.averagePullRequestTime} />
 
+        {averageTime && (
+          <AveragePRsTimeCard
+            titleText={'Overall Average Pull Request Time'}
+            avgHours={averageTime.avgHours}
+            avgMinutes={averageTime.avgMinutes} />
         )}
+
         <div style={{ marginTop: 20 }}>
           {chartData.length === 0 ? (
             <div>No pull requests found for the selected time range.</div>
