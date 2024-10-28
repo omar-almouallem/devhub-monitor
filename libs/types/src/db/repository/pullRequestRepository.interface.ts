@@ -4,6 +4,7 @@ export interface IPullRequestRepository {
   savePullRequest(
     pullRequest: IPullRequest,
     repo: IRepository,
+    userId: string,
   ): Promise<IPullRequest>;
   getPullByKey(uniqueKey: string): Promise<IPullRequest>;
   getPullRequestsByRepo(repoUniqueKey: string);
