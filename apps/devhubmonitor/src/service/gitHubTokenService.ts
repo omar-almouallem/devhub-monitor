@@ -34,10 +34,12 @@ export class GitHubTokenService {
   async storePullRequest (
     pullRequest: IPullRequest,
     repo: IRepository,
+    userId: string,
   ): Promise<IPullRequest> {
     const insertedData = await this.githubPullRequest.savePullRequest(
       pullRequest,
       repo,
+      userId,
     );
     return insertedData;
   }
