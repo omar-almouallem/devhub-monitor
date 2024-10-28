@@ -29,7 +29,11 @@ export const AuthProvider: React.FC<{ children: ReactNode; }> = ({ children }) =
         }
     }, [isAuthenticated]);
 
-    const login = () => setIsAuthenticated(true);
+    const login = () =>
+    {
+        window.location.replace('/dashboard');
+        setIsAuthenticated(true);
+    };
     const logout = () =>
     {
         setIsAuthenticated(false);
