@@ -1,32 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Spin, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 import GitHubTokenPrompt from './GitHubTokenPrompt';
 
-import { useRepositoriesData } from '../hooks/ui/useRepositoriesData';
+import { useGitHubTokenStatus } from '../context/GitHubTokenStatusContext';
+
 const { Title } = Typography;
 
 const Dashboard: React.FC = () =>
 {
+    const { gitHubTokenStatus } = useGitHubTokenStatus();
     const navigate = useNavigate();
-    const { userData, loading } = useRepositoriesData();
 
-    if (loading) {
-        return <Spin size="large" />;
-    }
-
-    if (!userData) {
-        return <Spin size="large" />;
-    }
-
-    if (!userData.githubToken) {
+    if (!gitHubTokenStatus?.githubToken) {
         return <GitHubTokenPrompt handleInsertTokenClick={() => navigate('/InsertToken')} />;
     }
 
     return (
         <div style={{ padding: '20px' }}>
-            {userData.isVerified === false && (
+            {gitHubTokenStatus?.isVerified === false && (
                 <div style={{ marginBottom: '20px', color: 'red' }}>
                     Invalid Token, You should insert a new token!
                 </div>
