@@ -6,7 +6,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Routes from './routes/routes';
 import { AuthProvider } from './context/AuthContext';
-import { UserDataProvider } from './context/UserDataContext';
+import { GitHubTokenProvider } from './context/GitHubTokenStatusContext';
+import { ListOfReposNamesProvider } from './context/ReposNamesContext';
 
 export function App ()
 {
@@ -14,20 +15,22 @@ export function App ()
 
     <StrictMode>
       <AuthProvider>
-        <UserDataProvider>
-          <ConfigProvider theme={{
-            token: {
-              fontFamily: "PT Serif, serif"
-            }
-          }}>
-            <Routes />
-            <ToastContainer
-              position='top-center'
-              theme='light'
-            />
+        <GitHubTokenProvider>
+          <ListOfReposNamesProvider>
+            <ConfigProvider theme={{
+              token: {
+                fontFamily: "PT Serif, serif"
+              }
+            }}>
+              <Routes />
+              <ToastContainer
+                position='top-center'
+                theme='light'
+              />
 
-          </ConfigProvider>
-        </UserDataProvider>
+            </ConfigProvider>
+          </ListOfReposNamesProvider>
+        </GitHubTokenProvider>
       </AuthProvider>
     </StrictMode >
   );
