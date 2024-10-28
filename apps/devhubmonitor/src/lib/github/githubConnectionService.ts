@@ -121,6 +121,7 @@ export class GitHubConnectionService {
         githubToken,
         since,
         updatedRepo,
+        userId,
       );
     }
   }
@@ -130,6 +131,7 @@ export class GitHubConnectionService {
     githubToken: string,
     since: Date,
     updatedRepo: IRepository,
+    userId: string,
   ) {
     const params = {
       state: 'all',
@@ -144,7 +146,7 @@ export class GitHubConnectionService {
       formatPullRequestsData,
       (pr) => new Date(pr.updated_at) < since,
     )) {
-      await this.githubTokenService.storePullRequest(pr, updatedRepo);
+      await this.githubTokenService.storePullRequest(pr, updatedRepo, userId);
     }
   }
 
