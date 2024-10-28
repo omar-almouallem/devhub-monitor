@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const PullRequestSchema: Schema = new Schema({
   id: { type: String, required: true },
+  userId: { type: String, required: true },
   unique_key: { type: String, required: true, unique: true },
   repo_unique_key: { type: String, required: true, unique: false },
   number: { type: Number, required: true },
