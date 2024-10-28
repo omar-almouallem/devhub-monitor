@@ -51,3 +51,13 @@ export class NoPullRequestsFoundError extends DevHubMonitorError {
     super('No pull requests found !');
   }
 }
+export class NoUserWithPRsFoundError extends DevHubMonitorError {
+  constructor () {
+    super('No users with pull requests !');
+  }
+}
+export class NoRepositoriesFoundError extends DevHubMonitorError {
+  constructor () {
+    super('No users with pull requests.!');
+  }
+}
