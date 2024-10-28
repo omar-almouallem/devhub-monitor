@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -6,12 +5,12 @@ import session from 'express-session';
 
 import { PORT } from './config';
 import { GLOBALPREFIX } from './config/constants';
-
-import userController from './controller/authController';
-import gitHubTokenServiceController from './controller/gitHubTokenController';
+import authController from './controller/authController';
 import userDataController from './controller/userDataController';
-import getAveragePullRequests from './controller/averagePRsController';
-
+import githubRepoController from './controller/githubRepoController';
+import averagePRsController from './controller/averagePRsController';
+import gitHubTokenController from './controller/gitHubTokenController';
+import pullRequestsController from './controller/pullRequestsController';
 import connectToDatabase from './infra/db.provider';
 import { startCronJob } from './lib/schedule/cronJob';
 
@@ -30,10 +29,12 @@ app.use(cors());
 app.use(express.json());
 app.use(
   `/${GLOBALPREFIX}`,
-  userController,
-  gitHubTokenServiceController,
+  authController,
   userDataController,
-  getAveragePullRequests,
+  averagePRsController,
+  githubRepoController,
+  gitHubTokenController,
+  pullRequestsController,
 );
 async function main () {
   try {
