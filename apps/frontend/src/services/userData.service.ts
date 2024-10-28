@@ -17,38 +17,59 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export async function getUserData () {
-  const response = await apiClient.get('/user');
-  return response.data;
-}
-
 export async function saveGithubToken (githubToken: string) {
   const response = await apiClient.post('/auth/github', { githubToken });
   return response;
 }
-
-export async function getAveragePRsByRepo (projectNames: string[]) {
-  const queryParams = projectNames
-    .map((name) => `projectNames=${encodeURIComponent(name)}`)
-    .join('&');
-  const response = await apiClient.get(`/averagePRsByProject?${queryParams}`);
-  return response;
+export async function getGithHubStatus () {
+  const response = await apiClient.get('/user/github-info');
+  return response.data;
 }
-
-export async function getAveragePRsByUser (userName: string) {
-  const response = await apiClient.get('/averagePRsByName/', {
-    params: { userName },
+export async function getReposByUser (cursor?: string) {
+  const response = await apiClient.get('/user/repos', {
+    params: { cursor: cursor || undefined },
   });
   return response;
 }
 
-export async function getAveragePRsByDate (
-  projectName: string,
-  startTime: string,
-  endTime: string,
+export async function getListOfReposNames (cursor?: string) {
+  const response = await apiClient.get('/user/repo-names', {
+    params: { cursor: cursor || undefined },
+  });
+
+  return response;
+}
+
+export async function getPRsByUser (userName: string) {
+  const response = await apiClient.get('/user/pull-requests', {
+    params: { userName },
+  });
+  return response.data;
+}
+
+export async function getPRsUsersLogin () {
+  const response = await apiClient.get('/user/pull-request/owners');
+  return response;
+}
+
+export async function getPRsByDate (
+  repoName: string,
+  startDate: string,
+  endDate: string,
 ) {
-  const response = await apiClient.get('/averagePRsByDate', {
-    params: { projectName, startTime, endTime },
+  const response = await apiClient.get('/user/pull-request/by-date', {
+    params: { repoName, startDate, endDate },
+  });
+
+  return response;
+}
+
+export async function getPRsByRepo (unique_key: string, cursor?: string) {
+  const encodedKey = encodeURIComponent(unique_key);
+  const response = await apiClient.get(`/repos/${encodedKey}/pull-requests`, {
+    params: {
+      cursor: cursor || undefined,
+    },
   });
   return response;
 }
