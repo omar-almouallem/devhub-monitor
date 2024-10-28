@@ -2,11 +2,13 @@ import express, { Response, Request } from 'express';
 import { NoPullRequestsFoundError } from '@dev-hub-monitor/types';
 
 import { handleError } from '../lib/utils/errorHandler';
-import { UserDataService } from '../service/userDataService';
+import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
+import { PullRequestService, GithubRepoService } from '../service';
 
 const router = express.Router();
-const userDataService = new UserDataService();
-router.get('/averagePRsByRepo', async (req: Request, res: Response) => {
+const pullRequestService = new PullRequestService();
+const githubRepoService = new GithubRepoService();
+router.get('/average/byRepo', async (req: Request, res: Response) => {
   try {
     let repoFullName = req.query.repoFullName as string[];
     if (typeof repoFullName === 'string') {
@@ -19,7 +21,7 @@ router.get('/averagePRsByRepo', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'You must input minimum 1 name' });
     }
 
-    const result = await userDataService.avregePRsByRepo(repoFullName);
+    const result = await pullRequestService.avregePRsByRepos(repoFullName);
 
     res.status(200).json(result);
   } catch (e) {
@@ -29,10 +31,10 @@ router.get('/averagePRsByRepo', async (req: Request, res: Response) => {
     handleError(res, e);
   }
 });
-router.get('/averagePRsByUser', async (req: Request, res: Response) => {
+router.get('/average/byUser', async (req: Request, res: Response) => {
   try {
     const userName = req.query.userName.toString();
-    const userData = await userDataService.avregePRsByUser(userName);
+    const userData = await pullRequestService.avregePRsByUser(userName);
     if (!userName) {
       return res.status(400).json({ message: 'Project name is required' });
     }
@@ -44,7 +46,7 @@ router.get('/averagePRsByUser', async (req: Request, res: Response) => {
     handleError(res, e);
   }
 });
-router.get('/averagePRsByDate', async (req: Request, res: Response) => {
+router.get('/average/byDate', async (req: Request, res: Response) => {
   try {
     const { repoName, startDate, endDate } = req.query;
     const repo = repoName.toString();
@@ -53,7 +55,22 @@ router.get('/averagePRsByDate', async (req: Request, res: Response) => {
     if (!repo || isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({ message: 'Invalid or missing parameters' });
     }
-    const userData = await userDataService.avregePRsByDate(repo, start, end);
+    const userData = await pullRequestService.avregePRsByDate(repo, start, end);
+    res.status(200).json(userData);
+  } catch (e) {
+    if (e instanceof NoPullRequestsFoundError) {
+      return res.status(204).json({ message: e.message });
+    }
+    handleError(res, e);
+  }
+});
+router.get('/RepoByUser', async (req, res) => {
+  try {
+    const userId = getUserIdFromAccessToken(req);
+    const userData = await githubRepoService.getRepoByUser(userId);
+    if (!userId) {
+      return res.status(400).json({ message: 'User name is required' });
+    }
     res.status(200).json(userData);
   } catch (e) {
     if (e instanceof NoPullRequestsFoundError) {
