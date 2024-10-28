@@ -6,10 +6,13 @@ import {
 
 import PullRequestModel from '../../models/pullRequest';
 
+import { paginate } from './services/prsPaginationService';
+
 export class MongoPullRequestRepository implements IPullRequestRepository {
   async savePullRequest (
     pullRequest: IPullRequest,
     repo: IRepository,
+    userId: string,
   ): Promise<IPullRequest> {
     const uniqueKey = `${repo.unique_key}/${pullRequest.number}`;
     const repoUniqueKey = repo.unique_key;
@@ -17,6 +20,7 @@ export class MongoPullRequestRepository implements IPullRequestRepository {
       { unique_key: uniqueKey },
       {
         unique_key: uniqueKey,
+        userId: userId,
         repo_unique_key: repoUniqueKey,
         ...pullRequest,
       },
@@ -30,11 +34,17 @@ export class MongoPullRequestRepository implements IPullRequestRepository {
     return pull;
   }
 
-  async getPullRequestsByRepo (repoUniqueKey: string) {
-    const pullRequests = await PullRequestModel.find({
+  async getPullRequestsByRepo (repoUniqueKey: string, cursor?: string) {
+    const reposQuery = PullRequestModel.find({
       repo_unique_key: repoUniqueKey,
     });
-    return pullRequests;
+    const paginatedResult = await paginate(reposQuery, cursor);
+
+    return {
+      results: paginatedResult.results,
+      nextCursor: paginatedResult.nextCursor,
+      hasMore: paginatedResult.hasMore,
+    };
   }
 
   async projectAverages (repoUniqueKeys: string[]) {
@@ -66,10 +76,7 @@ export class MongoPullRequestRepository implements IPullRequestRepository {
         },
       },
     ]);
-    return {
-      avgHours: result[0].avgHours,
-      avgMinutes: result[0].avgMinutes,
-    };
+    return result[0];
   }
 
   async getAveragePRsByRepos (repoUniqueKeys: string[]) {
@@ -100,6 +107,25 @@ export class MongoPullRequestRepository implements IPullRequestRepository {
       avgMinutes: result[0].avgMinutes,
     };
   }
+  async getPRsuserLoginByUserId (userId: string) {
+    const result = await PullRequestModel.distinct('user.login', {
+      userId: userId,
+    });
+    return result;
+  }
+  async getPullRequestsByUser (userLogin: string) {
+    const result = await PullRequestModel.find(
+      { 'user.login': userLogin },
+      {
+        _id: 0,
+        title: 1,
+        'duration.hours': 1,
+        'duration.minutes': 1,
+      },
+    );
+
+    return result;
+  }
 
   async getAveragePRsByDate (
     repoUniqueKey: string,
@@ -122,9 +148,22 @@ export class MongoPullRequestRepository implements IPullRequestRepository {
       },
     ]);
 
-    return {
-      avgHours: result[0].avgHours,
-      avgMinutes: result[0].avgMinutes,
-    };
+    return result[0];
+  }
+  async getPullRequestsByDate (
+    repoUniqueKey: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    const result = await PullRequestModel.aggregate([
+      {
+        $match: {
+          repo_unique_key: repoUniqueKey,
+          created_at: { $gte: new Date(startDate), $lte: new Date(endDate) },
+        },
+      },
+    ]);
+
+    return result;
   }
 }
