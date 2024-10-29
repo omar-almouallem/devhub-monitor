@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "start:backend": "nx serve devhubmonitor",
-    "start:frontend": "nx serve frontend",
-    "start:dev": "yarn run start:backend && yarn run start:frontend"
+    "start:frontend": "nx serve frontend"
+
   },
   "private": true,
   "dependencies": {
