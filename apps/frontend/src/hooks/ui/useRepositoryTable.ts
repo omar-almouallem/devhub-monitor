@@ -1,22 +1,20 @@
 import { useState } from 'react';
 
-import { Repository } from '../../types/types';
-
-const useRepositoryTable = (gitHubRepoData: Repository[]) => {
+const useRepositoryTable = (gitHubRepoData: any) => {
   const [searchText, setSearchText] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value.toLowerCase());
   };
 
-  const filteredData = gitHubRepoData.filter((repo: Repository) =>
-    repo.name.toLowerCase().includes(searchText),
+  const filteredData = gitHubRepoData.filter((data: any) =>
+    data.repo.full_name.toLowerCase().includes(searchText),
   );
 
-  const handleCardClick = (repo: Repository) => {
-    setSelectedRepo(repo);
+  const handleCardClick = (data: any) => {
+    setSelectedRepo(data);
     setIsModalVisible(true);
   };
 
