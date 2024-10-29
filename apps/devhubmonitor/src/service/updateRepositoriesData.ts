@@ -43,14 +43,11 @@ export class UpdateDataService {
                 isVerified: false,
               });
             } else {
-              console.log(e);
               throw new ServerGitHubTokenError();
             }
           }
         },
       );
-
-      console.log('Completed processing users:', results.length);
     } catch (e) {
       handleError(e.response, e);
     }

@@ -1,12 +1,14 @@
 import { useState } from 'react';
-
 import useFetchPRsByRepo from '../api/useFetchPRsByRepo';
+import { useListOfReposNames } from '../../context/ReposNamesContext';
 
-const usePRsByRepoActions = (userData: any) => {
+const usePRsByRepoActions = () => {
   const [selectedRepositories, setSelectedRepositories] = useState<string[]>(
     [],
   );
   const { averagePRs, fetchPRsByRepo } = useFetchPRsByRepo();
+
+  const { listOfReposNames, fetchMoreReposNames } = useListOfReposNames();
 
   const handleSelectChange = (repoNames: string[]) => {
     setSelectedRepositories(repoNames);
@@ -16,16 +18,17 @@ const usePRsByRepoActions = (userData: any) => {
     fetchPRsByRepo(selectedRepositories);
   };
 
-  const repositoriesWithPRs = userData.gitHubRepoData.filter(
-    (repo: any) => repo.pull_requests && repo.pull_requests.length > 0,
-  );
+  const handleLoadMore = () => {
+    fetchMoreReposNames();
+  };
 
   return {
     selectedRepositories,
     averagePRs,
     handleSelectChange,
     handleCalculateAverage,
-    repositoriesWithPRs,
+    listOfReposNames,
+    handleLoadMore,
   };
 };
 

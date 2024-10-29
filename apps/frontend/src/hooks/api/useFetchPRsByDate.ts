@@ -1,15 +1,18 @@
 import { useState } from 'react';
+import { message } from 'antd';
 import moment from 'moment';
 
-import { getAveragePRsByDate } from '../../services/userData.service';
-import { message } from 'antd';
+import { getAveragePRsByDate } from '../../services/averagePRs.service';
+import { getPRsByDate } from '../../services/userData.service';
+
 import { handleApiError } from './handleApiError';
 
 const useFetchPRsByDate = (
   projectName: string,
   dates: [moment.Moment, moment.Moment] | null,
 ) => {
-  const [pullRequestsData, setPullRequestsData] = useState<any>(null);
+  const [filteredRepo, setFilteredRepo] = useState([]);
+  const [averageTime, setAverageTime] = useState<any>(null);
 
   const fetchData = async () => {
     if (!dates || dates.length !== 2) {
@@ -24,19 +27,25 @@ const useFetchPRsByDate = (
         startTime.format('YYYY-MM-DD'),
         endTime.format('YYYY-MM-DD'),
       );
+      const res = await getPRsByDate(
+        projectName,
+        startTime.format('YYYY-MM-DD'),
+        endTime.format('YYYY-MM-DD'),
+      );
+      setFilteredRepo(res.data);
       if (response.status === 204) {
         message.error('No pull requests found !');
       }
       if (response.status === 200) {
         message.success('Data fetched successfully');
-        setPullRequestsData(response.data);
+        setAverageTime(response.data);
       }
     } catch (e: any) {
       handleApiError(e);
     }
   };
 
-  return { pullRequestsData, fetchData };
+  return { filteredRepo, averageTime, fetchData };
 };
 
 export default useFetchPRsByDate;

@@ -2,34 +2,22 @@ import { useState } from 'react';
 
 import useFetchPRsByUser from '../api/useFetchPRsByUser';
 
-const usePRsByUserActions = (userData: any) => {
+const usePRsByUserActions = () => {
   const [selectedUser, setSelectedUser] = useState<string>('');
-  const { filteredPRs, fetchPRsByUser } = useFetchPRsByUser();
+  const { fetchPRsByUser, averageTime, filteredPRs, listOfNames } =
+    useFetchPRsByUser();
 
   const handleSelectChange = (username: string) => {
     setSelectedUser(username);
   };
-
-  const handleFilterByUser = () => {
-    fetchPRsByUser(selectedUser);
+  const handleFilterByUser = async () => {
+    await fetchPRsByUser(selectedUser);
   };
-
-  const usersWithPRs: any[] = [
-    ...new Set(
-      userData.gitHubRepoData
-        .filter(
-          (repo: any) => repo.pull_requests && repo.pull_requests.length > 0,
-        )
-        .flatMap((repo: any) =>
-          repo.pull_requests.map((pr: any) => pr.user.login),
-        ),
-    ),
-  ];
-
   return {
     selectedUser,
     filteredPRs,
-    usersWithPRs,
+    averageTime,
+    listOfNames,
     handleSelectChange,
     handleFilterByUser,
   };

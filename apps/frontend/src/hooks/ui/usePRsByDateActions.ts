@@ -1,32 +1,42 @@
 import { useState } from 'react';
-import { message } from 'antd';
 import moment from 'moment';
 
 import useFetchPRsByDate from '../api/useFetchPRsByDate';
+import { useListOfReposNames } from '../../context/ReposNamesContext';
 
-const usePRsByDateActions = (userData: any) => {
-  const [projectName, setProjectName] = useState<string>('');
+const usePRsByDateActions = () => {
+  const [selectedRepositories, setSelectedRepositories] = useState('');
   const [dates, setDates] = useState<[moment.Moment, moment.Moment] | null>(
     null,
   );
 
-  const { pullRequestsData, fetchData } = useFetchPRsByDate(projectName, dates);
+  const { filteredRepo, averageTime, fetchData } = useFetchPRsByDate(
+    selectedRepositories,
+    dates,
+  );
+  const { listOfReposNames, fetchMoreReposNames } = useListOfReposNames();
 
   const handleSelectChange = (repoName: string) => {
-    setProjectName(repoName);
+    setSelectedRepositories(repoName);
   };
 
   const handleFetchData = async () => {
     await fetchData();
   };
+  const handleLoadMore = () => {
+    fetchMoreReposNames();
+  };
 
   return {
-    projectName,
+    selectedRepositories,
     dates,
-    pullRequestsData,
+    filteredRepo,
     handleSelectChange,
     handleFetchData,
     setDates,
+    listOfReposNames,
+    handleLoadMore,
+    averageTime,
   };
 };
 

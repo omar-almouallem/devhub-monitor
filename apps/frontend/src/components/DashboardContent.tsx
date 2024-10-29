@@ -6,10 +6,8 @@ import Dashboard from './Dashboard';
 import PullRequestFilter from '../pages/statistics/averagePRsByDate';
 import FilterByRepo from '../pages/statistics/averagePRsByRepo';
 import FilterByUser from '../pages/statistics/averagePRsByUser';
-import RepositoriesTable from './RepositoryTable';
-import { DashboardFilled } from '@ant-design/icons';
+import RepositoriesTable from '../pages/RepositoryTable';
 
-const { Title } = Typography;
 const { TabPane } = Tabs;
 
 const AppView = () =>

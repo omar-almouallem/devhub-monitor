@@ -1,12 +1,14 @@
 import { ReactNode } from 'react';
 
 export interface PullRequest {
+  [x: string]: string | number | Date;
   duration: any;
   user: any;
   id: number;
   title: string;
   state: string;
-  language?: string;
+  closed_at: string;
+
   created_at: string;
 }
 

@@ -2,7 +2,7 @@ import express, { Response, Request } from 'express';
 import { InvalidGitHubTokenError } from '@dev-hub-monitor/types';
 
 import { GitHubConnectionService } from '../lib/github/githubConnectionService';
-import { GitHubTokenService } from './../service/gitHubTokenService';
+import { GitHubTokenService } from './../service';
 import { getUserIdFromAccessToken } from '../lib/utils/authUtils';
 import { handleError } from '../lib/utils/errorHandler';
 import { getSixMonthsAgo } from '../lib/utils/timeHelpers';

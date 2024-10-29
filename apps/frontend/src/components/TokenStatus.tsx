@@ -1,6 +1,8 @@
-import React from 'react';
-import { Row, Col, Card, Typography } from 'antd';
-import { useUserData } from '../context/UserDataContext';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Card, Typography, message } from 'antd';
+
+import { useGitHubTokenStatus } from '../context/GitHubTokenStatusContext';
+
 const { Title, Text } = Typography;
 
 const CustomCard = ({ title, gitHubToken, tokenStatus, titleColor }: { title: string; gitHubToken: string; tokenStatus: string; titleColor: string; }) =>
@@ -15,7 +17,6 @@ const CustomCard = ({ title, gitHubToken, tokenStatus, titleColor }: { title: st
                             <Text style={{ color: 'gray' }}>Your GitHub token: {gitHubToken}</Text>
                         )}
                         <br />
-
                         <Text style={{ color: titleColor }}>{tokenStatus}</Text>
                     </Card>
                 </div>
@@ -26,31 +27,31 @@ const CustomCard = ({ title, gitHubToken, tokenStatus, titleColor }: { title: st
 
 const TokenStatus = () =>
 {
-    const { userData } = useUserData();
 
-    if (userData.githubToken && userData.isVerified === true) {
+    const { gitHubTokenStatus } = useGitHubTokenStatus();
+    if (gitHubTokenStatus?.githubToken && gitHubTokenStatus.isVerified === true) {
         return (
             <CustomCard
                 title="✅ Token Verified"
-                gitHubToken={userData.githubToken}
+                gitHubToken={gitHubTokenStatus.githubToken}
                 tokenStatus="Your GitHub token is verified and active."
                 titleColor="green"
             />
         );
     }
 
-    if (userData.githubToken && userData.isVerified === false) {
+    if (gitHubTokenStatus?.githubToken && gitHubTokenStatus.isVerified === false) {
         return (
             <CustomCard
                 title="⚠️ Token Not Verified"
-                gitHubToken={userData.githubToken}
+                gitHubToken={gitHubTokenStatus?.githubToken}
                 tokenStatus="Your GitHub token is added but not verified yet."
                 titleColor="orange"
             />
         );
     }
 
-    if (!userData.githubToken) {
+    if (!gitHubTokenStatus?.githubToken) {
         return (
             <CustomCard
                 title="❌ No Token Added"
@@ -61,6 +62,7 @@ const TokenStatus = () =>
         );
     }
 
+    return null; // If no matching case, return null
 };
 
 export default TokenStatus;

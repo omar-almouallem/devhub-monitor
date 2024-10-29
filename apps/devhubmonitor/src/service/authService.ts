@@ -67,6 +67,8 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+      githubToken: user.githubToken,
+      isVerified: user.isVerified,
     };
   }
 }

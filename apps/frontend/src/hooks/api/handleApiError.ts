@@ -1,4 +1,3 @@
-import { Response } from 'express';
 import { message } from 'antd';
 
 export const handleApiError = (e: any) => {
@@ -9,7 +8,6 @@ export const handleApiError = (e: any) => {
       message.error(`${e.response.data.message}`);
     }
   } else {
-    console.log(e);
     message.error('Network error or server is unreachable');
   }
 };

@@ -10,6 +10,8 @@ import { BasicLogin, BasicSignup } from '../services/auth.service';
 
 import Button from './Button';
 import CustomTypography from './Typography';
+import { useListOfReposNames } from '../context/ReposNamesContext';
+import { useGitHubTokenStatus } from '../context/GitHubTokenStatusContext';
 
 interface DynamicFormProps
 {
@@ -20,6 +22,8 @@ const AuthForm: React.FC<DynamicFormProps> = ({ formType }) =>
 {
 
   const { login } = useAuth();
+
+
   const navigate = useNavigate();
 
   const validationSchema = formType === 'signup' ? basicSignupValidationSchema : basicLoginValidationSchema;
@@ -35,7 +39,6 @@ const AuthForm: React.FC<DynamicFormProps> = ({ formType }) =>
       try {
         if (formType === 'signup') {
           const signupResponse = await BasicSignup(values);
-          console.log(signupResponse);
           if (signupResponse.status === 200) {
             navigate('/auth/login');
             toast.success('Registration successful! You can now log in.');
@@ -49,14 +52,13 @@ const AuthForm: React.FC<DynamicFormProps> = ({ formType }) =>
           if (token) {
             login();
             toast.success('Login successful!');
-            navigate('/dashboard');
           } else {
+
             toast.error('Login failed. Please try again.');
           }
         }
       } catch (error: any) {
         if (error.response) {
-          console.log(error);
           const errorMessage = error.response.data.message;
           formik.setErrors({ email: errorMessage });
         }
